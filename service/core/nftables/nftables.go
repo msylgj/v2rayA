@@ -1,4 +1,4 @@
-package iptables
+package nftables
 
 import (
 	"github.com/v2rayA/v2rayA/common"
@@ -34,7 +34,7 @@ type proxySetter interface {
 	RemoveIPWhitelist(cidr string)
 }
 
-// watch interface changes and add specific IPs to whitelist on iptables
+// watch interface changes and add specific IPs to whitelist on nftalbes
 func SetWatcher(setter proxySetter) {
 	if watcher != nil {
 		watcher.Close()
@@ -53,10 +53,6 @@ func (c Setter) Run(stopAtError bool) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	commands := c.Cmds
-	if common.IsDocker() {
-		commands = strings.ReplaceAll(commands, "iptables", "iptables-legacy")
-		commands = strings.ReplaceAll(commands, "ip6tables", "ip6tables-legacy")
-	}
 	var errs []error
 	if c.PreFunc != nil {
 		e := c.PreFunc()

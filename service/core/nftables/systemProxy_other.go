@@ -1,7 +1,7 @@
 //go:build linux || openbsd || freebsd
 // +build linux openbsd freebsd
 
-package iptables
+package nftables
 
 import "fmt"
 

@@ -14,7 +14,7 @@ import (
 	"github.com/v2rayA/v2rayA/common/netTools/ports"
 	"github.com/v2rayA/v2rayA/conf"
 	"github.com/v2rayA/v2rayA/core/coreObj"
-	"github.com/v2rayA/v2rayA/core/iptables"
+	"github.com/v2rayA/v2rayA/core/nftables"
 	"github.com/v2rayA/v2rayA/core/serverObj"
 	"github.com/v2rayA/v2rayA/core/specialMode"
 	"github.com/v2rayA/v2rayA/core/v2ray/asset"
@@ -414,7 +414,7 @@ func FilterIPs(ips []string) []string {
 			ret = append(ret, ip)
 		}
 	}
-	if !iptables.IsIPv6Supported() {
+	if !nftables.IsIPv6Supported() {
 		return ret
 	}
 	for _, ip := range ips {
@@ -920,7 +920,7 @@ func (t *Template) setDualStack() {
 		// copy a group of ipv6 inbounds and set the tag
 		for i := range t.Inbounds {
 			if t.Inbounds[i].Tag == "transparent" && t.Setting.TransparentType == configure.TransparentRedirect {
-				// https://ipset.netfilter.org/iptables-extensions.man.html#lbDK
+				// https://ipset.netfilter.org/nftables-extensions.man.html#lbDK
 				// REDIRECT redirects the packet to the machine itself by changing the destination IP to the primary address of the incoming interface.
 				// So we should listen at 0.0.0.0 instead of 127.0.0.1
 				inbounds6[i].Tag = "THIS_IS_A_DROPPED_TAG"
@@ -946,7 +946,7 @@ func (t *Template) setDualStack() {
 			}
 		}
 
-		if iptables.IsIPv6Supported() {
+		if nftables.IsIPv6Supported() {
 			t.Inbounds = append(t.Inbounds, inbounds6...)
 		}
 
@@ -959,7 +959,7 @@ func (t *Template) setDualStack() {
 					tag6 = append(tag6, tag+tag6Suffix)
 				}
 			}
-			if v6supported := iptables.IsIPv6Supported(); len(tag6) > 0 && v6supported {
+			if v6supported := nftables.IsIPv6Supported(); len(tag6) > 0 && v6supported {
 				t.Routing.Rules[i].InboundTag = append(t.Routing.Rules[i].InboundTag, tag6...)
 			}
 		}
@@ -1129,7 +1129,7 @@ func Ps2OutboundTag(ps string) string {
 }
 
 func (t *Template) updatePrivateRouting() {
-	privateAddrs, _ := iptables.GetLocalCIDR()
+	privateAddrs, _ := nftables.GetLocalCIDR()
 	if len(privateAddrs) == 0 {
 		return
 	}

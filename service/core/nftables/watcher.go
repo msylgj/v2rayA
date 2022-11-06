@@ -1,4 +1,4 @@
-package iptables
+package nftables
 
 import (
 	"time"

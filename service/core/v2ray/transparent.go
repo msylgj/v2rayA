@@ -3,7 +3,7 @@ package v2ray
 import (
 	"fmt"
 	"github.com/v2rayA/v2rayA/conf"
-	"github.com/v2rayA/v2rayA/core/iptables"
+	"github.com/v2rayA/v2rayA/core/nftables"
 	"github.com/v2rayA/v2rayA/core/specialMode"
 	"github.com/v2rayA/v2rayA/db/configure"
 	"github.com/v2rayA/v2rayA/pkg/util/log"
@@ -12,14 +12,14 @@ import (
 )
 
 func deleteTransparentProxyRules() {
-	iptables.CloseWatcher()
+	nftables.CloseWatcher()
 	if !conf.GetEnvironmentConfig().Lite {
 		removeResolvHijacker()
-		iptables.Tproxy.GetCleanCommands().Run(false)
-		iptables.Redirect.GetCleanCommands().Run(false)
-		iptables.DropSpoofing.GetCleanCommands().Run(false)
+		nftables.Tproxy.GetCleanCommands().Run(false)
+		nftables.Redirect.GetCleanCommands().Run(false)
+		// nftables.DropSpoofing.GetCleanCommands().Run(false)
 	}
-	iptables.SystemProxy.GetCleanCommands().Run(false)
+	nftables.SystemProxy.GetCleanCommands().Run(false)
 	time.Sleep(30 * time.Millisecond)
 }
 
@@ -30,29 +30,29 @@ func writeTransparentProxyRules() (err error) {
 			deleteTransparentProxyRules()
 		}
 	}()
-	if specialMode.ShouldUseSupervisor() {
-		if err = iptables.DropSpoofing.GetSetupCommands().Run(true); err != nil {
-			log.Warn("DropSpoofing can't be enable: %v", err)
-			return err
-		}
-	}
+	// if specialMode.ShouldUseSupervisor() {
+	// 	if err = nftables.DropSpoofing.GetSetupCommands().Run(true); err != nil {
+	// 		log.Warn("DropSpoofing can't be enable: %v", err)
+	// 		return err
+	// 	}
+	// }
 	setting := configure.GetSettingNotNil()
 	switch setting.TransparentType {
 	case configure.TransparentTproxy:
-		if err = iptables.Tproxy.GetSetupCommands().Run(true); err != nil {
+		if err = nftables.Tproxy.GetSetupCommands().Run(true); err != nil {
 			if strings.Contains(err.Error(), "TPROXY") && strings.Contains(err.Error(), "No chain") {
 				err = fmt.Errorf("you does not compile xt_TPROXY in kernel")
 			}
 			return fmt.Errorf("not support \"tproxy\" mode of transparent proxy: %w", err)
 		}
-		iptables.SetWatcher(&iptables.Tproxy)
+		nftables.SetWatcher(&nftables.Tproxy)
 	case configure.TransparentRedirect:
-		if err = iptables.Redirect.GetSetupCommands().Run(true); err != nil {
+		if err = nftables.Redirect.GetSetupCommands().Run(true); err != nil {
 			return fmt.Errorf("not support \"redirect\" mode of transparent proxy: %w", err)
 		}
-		iptables.SetWatcher(&iptables.Redirect)
+		nftables.SetWatcher(&nftables.Redirect)
 	case configure.TransparentSystemProxy:
-		if err = iptables.SystemProxy.GetSetupCommands().Run(true); err != nil {
+		if err = nftables.SystemProxy.GetSetupCommands().Run(true); err != nil {
 			return fmt.Errorf("not support \"system proxy\" mode of transparent proxy: %w", err)
 		}
 	default:
