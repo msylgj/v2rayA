@@ -1,7 +1,7 @@
 //go:build darwin
 // +build darwin
 
-package iptables
+package nftables
 
 import (
 	"fmt"
