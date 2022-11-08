@@ -9,6 +9,7 @@ import (
 	"net"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 func IPNet2CIDR(ipnet *net.IPNet) string {
@@ -53,12 +54,6 @@ func GetHandles(eleType string, keyword string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var handles []string
-	for _, handle := range out {
-		if len(handle) <= 0 {
-			continue
-		}
-		handles = append(handles, handle)
-	}
+	handles := strings.Split(string(out), "\n")
 	return handles, nil
 }

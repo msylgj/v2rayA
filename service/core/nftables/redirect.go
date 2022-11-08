@@ -24,7 +24,7 @@ func (r *redirect) AddIPWhitelist(cidr string) {
 
 func (r *redirect) RemoveIPWhitelist(cidr string) {
 	var commands string
-	handles, err = GetHandles("chain inet fw4 TP_RULE", cidr)
+	handles, err := GetHandles("chain inet fw4 TP_RULE", cidr)
 	if err != nil {
 		return
 	}
@@ -93,12 +93,11 @@ nft delete chain inet fw4 TP_OUT
 nft delete chain inet fw4 nat_output
 nft flush chain inet fw4 TP_PRE
 `
-	handles, err = GetHandles("chain inet fw4 dstnat", "TP_PRE")
-	if err != nil {
-		return
-	}
-	for _, handle :=range handles{
-		commands += fmt.Sprintf(`nft delete rule inet fw4 dstnat handle %s\n`, handle)
+	handles, err := GetHandles("chain inet fw4 dstnat", "TP_PRE")
+	if err == nil {
+		for _, handle :=range handles{
+			commands += fmt.Sprintf(`nft delete rule inet fw4 dstnat handle %s\n`, handle)
+		}
 	}
 
 	commands += `

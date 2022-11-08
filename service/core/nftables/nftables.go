@@ -1,9 +1,7 @@
 package nftables
 
 import (
-	"github.com/v2rayA/v2rayA/common"
 	"github.com/v2rayA/v2rayA/common/cmds"
-	"strings"
 	"sync"
 	"time"
 )

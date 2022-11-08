@@ -32,7 +32,7 @@ func (t *tproxy) AddIPWhitelist(cidr string) {
 
 func (t *tproxy) RemoveIPWhitelist(cidr string) {
 	var commands string
-	handles, err = GetHandles("chain inet fw4 TP_MANGLE_RULE", cidr)
+	handles, err := GetHandles("chain inet fw4 TP_MANGLE_RULE", cidr)
 	if err != nil {
 		return
 	}
@@ -130,12 +130,11 @@ ip route del local 0.0.0.0/0 dev lo table 100
 
 nft flush chain inet fw4 TP_MANGLE_OUT
 `
-	handles, err = GetHandles("chain inet fw4 mangle_output", "TP_MANGLE_OUT")
-	if err != nil {
-		return
-	}
-	for _, handle :=range handles{
-		commands += fmt.Sprintf(`nft delete rule inet fw4 mangle_output handle %s\n`, handle)
+	handles, err := GetHandles("chain inet fw4 mangle_output", "TP_MANGLE_OUT")
+	if err == nil {
+		for _, handle :=range handles{
+			commands += fmt.Sprintf(`nft delete rule inet fw4 mangle_output handle %s\n`, handle)
+		}
 	}
 	commands += `
 nft delete chain inet fw4 TP_MANGLE_OUT
@@ -143,10 +142,9 @@ nft flush chain inet fw4 TP_MANGLE_PRE
 `
 	handles, err = GetHandles("chain inet fw4 mangle_prerouting", "TP_MANGLE_PRE")
 	if err != nil {
-		return
-	}
-	for _, handle :=range handles{
-		commands += fmt.Sprintf(`nft delete rule inet fw4 mangle_prerouting handle %s\n`, handle)
+		for _, handle :=range handles{
+			commands += fmt.Sprintf(`nft delete rule inet fw4 mangle_prerouting handle %s\n`, handle)
+		}
 	}
 	commands += `
 nft delete chain inet fw4 TP_MANGLE_PRE
